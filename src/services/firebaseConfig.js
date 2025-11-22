@@ -7,13 +7,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBsQ6RGl4iD9Z-Estf9OY7-PU1x_quYegw",
-  authDomain: "super-fortnight-007.firebaseapp.com",
-  projectId: "super-fortnight-007",
-  storageBucket: "super-fortnight-007.firebasestorage.app",
-  messagingSenderId: "793273571936",
-  appId: "1:793273571936:web:31a6c44962233dfb28c105",
-  measurementId: "G-5GBM241QVT"
+  apiKey: process.env.EXPO_PUBLIC_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_MEASUREMENT_ID,
 };
 
 // Initializes Firebase
