@@ -10,12 +10,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import ModalAddressForm from "../../components/ModalAddressForm";
 
-
 import {
   getAddresses,
   addAddress,
   deleteAddress,
   setDefaultAddress,
+  updateAddress,
 } from "../../services/addressService";
 
 export default function AddressesScreen() {
@@ -23,7 +23,6 @@ export default function AddressesScreen() {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState(null);
-
 
   async function load() {
     const data = await getAddresses();
@@ -33,18 +32,6 @@ export default function AddressesScreen() {
   useEffect(() => {
     load();
   }, []);
-
-  function handleCreate() {
-    Alert.prompt(
-      "New Address",
-      "Enter your address",
-      async (text) => {
-        if (!text) return;
-        await addAddress({ label: "Address", address: text });
-        load();
-      }
-    );
-  }
 
   async function handleDelete(id) {
     Alert.alert(
@@ -64,97 +51,92 @@ export default function AddressesScreen() {
     );
   }
 
-  async function handleSetDefault(id) {
-    await setDefaultAddress(id);
-    load();
-  }
-
   function handleEdit(item) {
     setEditData(item);
     setShowEditModal(true);
   }
 
+  async function handleSetDefault(id) {
+    await setDefaultAddress(id);
+    load();
+  }
+
   return (
     <>
-    <View style={styles.container}>
-      <FlatList
-        data={list}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 20 }}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            {/* LEFT */}
-            <View style={{ maxWidth: "75%" }}>
-              {item.label ? (
-                <Text style={styles.label}>{item.label}</Text>
-              ) : null}
+      <View style={styles.container}>
+        <FlatList
+          data={list}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 20, paddingBottom: 80 }}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              {/* LEFT SECTION */}
+              <View style={{ flex: 1, paddingRight: 10 }}>
+                {item.label ? (
+                  <Text style={styles.label}>{item.label}</Text>
+                ) : null}
 
-              <Text style={styles.address}>{item.address}</Text>
+                <Text style={styles.address}>{item.address}</Text>
 
-              {item.city ? (
-                <Text style={styles.sub}>{item.city}</Text>
-              ) : null}
+                {item.city ? <Text style={styles.sub}>{item.city}</Text> : null}
+                {item.postal ? <Text style={styles.sub}>{item.postal}</Text> : null}
 
-              {item.postal ? (
-                <Text style={styles.sub}>{item.postal}</Text>
-              ) : null}
+                {item.isDefault && (
+                  <View style={styles.defaultBadge}>
+                    <Text style={styles.defaultBadgeText}>Default</Text>
+                  </View>
+                )}
+              </View>
 
-              {item.isDefault && (
-                <Text style={styles.defaultTag}>Default</Text>
-              )}
+              {/* ACTIONS */}
+              <View style={styles.actions}>
+                <TouchableOpacity onPress={() => handleSetDefault(item.id)}>
+                  <Ionicons
+                    name={item.isDefault ? "star" : "star-outline"}
+                    size={24}
+                    color={item.isDefault ? "#FFD700" : PRIMARY}
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => handleEdit(item)}>
+                  <Ionicons name="pencil-outline" size={22} color={PRIMARY} />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                  <Ionicons name="trash-outline" size={22} color={PRIMARY} />
+                </TouchableOpacity>
+              </View>
             </View>
+          )}
+        />
 
+        {/* ADD NEW */}
+        <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
+          <Ionicons name="add-circle-outline" size={22} color="#FFF" />
+          <Text style={styles.buttonText}>Add New Address</Text>
+        </TouchableOpacity>
+      </View>
 
-            {/* RIGHT */}
-            <View style={styles.actions}>
-              {/* Make Default */}
-              <TouchableOpacity onPress={() => handleSetDefault(item.id)}>
-                <Ionicons
-                  name={item.isDefault ? "star" : "star-outline"}
-                  size={24}
-                  color={item.isDefault ? "#FFD700" : "#FF4647"}
-                />
-              </TouchableOpacity>
-              
-              {/* Edit */}
-              <TouchableOpacity onPress={() => handleEdit(item)}>
-                <Ionicons name="pencil-outline" size={22} color="#FF4647" />
-              </TouchableOpacity>
-
-              {/* Delete */}
-              <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                <Ionicons name="trash-outline" size={22} color="#FF4647" />
-              </TouchableOpacity>
-
-            </View>
-          </View>
-        )}
-      />
-
-    <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
-      <Text style={styles.buttonText}>Add New Address</Text>
-    </TouchableOpacity>
-    </View>
-
-    <ModalAddressForm
-      visible={showModal}
-      onClose={() => setShowModal(false)}
+      {/* CREATE MODAL */}
+      <ModalAddressForm
+        visible={showModal}
+        onClose={() => setShowModal(false)}
         onSubmit={async (data) => {
           await addAddress(data);
           load();
         }}
-    />
+      />
 
-    <ModalAddressForm
-      visible={showEditModal}
-      onClose={() => setShowEditModal(false)}
-      defaultValues={editData || {}}
+      {/* EDIT MODAL */}
+      <ModalAddressForm
+        visible={showEditModal}
+        defaultValues={editData || {}}
+        onClose={() => setShowEditModal(false)}
         onSubmit={async (data) => {
           await updateAddress(editData.id, data);
           load();
         }}
-    />
-
+      />
     </>
   );
 }
@@ -166,56 +148,91 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+
+  /* CARD */
   card: {
-    backgroundColor: "#FFF5F5",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: "#FFFFFF",
+    padding: 18,
+    borderRadius: 16,
+    marginBottom: 18,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
+
+  label: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 2,
+  },
+
   address: {
     fontSize: 15,
     fontWeight: "500",
+    color: "#333",
     marginBottom: 4,
   },
-  defaultTag: {
-    backgroundColor: PRIMARY,
-    color: "#FFF",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    fontSize: 12,
-    marginTop: 4,
-    alignSelf: "flex-start",
-  },
-  actions: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  button: {
-    backgroundColor: PRIMARY,
-    margin: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  label: {
-  fontSize: 15,
-  fontWeight: "700",
-  marginBottom: 2,
-  color: "#1A1A1A",
-  },
+
   sub: {
     fontSize: 13,
-    color: "#555",
-    marginTop: 1,
+    color: "#6F6F6F",
+    marginTop: 2,
   },
 
+  defaultBadge: {
+    marginTop: 8,
+    backgroundColor: PRIMARY,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+  },
+
+  defaultBadgeText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
+  actions: {
+    flexDirection: "row",
+    gap: 14,
+    alignItems: "center",
+  },
+
+  /* BUTTON */
+  button: {
+    flexDirection: "row",
+    backgroundColor: PRIMARY,
+    marginHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+
+    marginBottom: 20,
+  },
+
+  buttonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
 });
