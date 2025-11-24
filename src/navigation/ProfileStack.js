@@ -12,54 +12,79 @@ const Stack = createNativeStackNavigator();
 export default function ProfileStack() {
   return (
     <Stack.Navigator
-    screenOptions={{
+      screenOptions={{
         headerStyle: {
-        backgroundColor: "#FFFFFF",
+          backgroundColor: "#FFFFFF",
         },
         headerTitleStyle: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: "#1A1A1A",
+          fontSize: 18,
+          fontWeight: "600",
+          color: "#1A1A1A",
         },
-        headerTintColor: "#FF4647",
-        headerBackTitleVisible: false,
+        headerTintColor: "#FF4647",     // ARROW vermelho
+        headerBackTitle: "",            // remove "< ProfileHome"
+        headerBackTitleVisible: false,  // garante que não aparece
         headerTitleAlign: "center",
-    }}
+      }}
     >
-        <Stack.Screen
-        name="ProfileMain"
+
+      {/* IMPORTANTE: NÃO usar headerShown:false aqui, isso bugava o arrow */}
+      <Stack.Screen
+        name="ProfileHome"
         component={ProfileScreen}
-        options={{ headerShown: false }}
-        />
+        options={{
+          title: "Profile",
+        }}
+      />
 
       <Stack.Screen
         name="Addresses"
         component={AddressesScreen}
-        options={{ title: "My Addresses" }}
+        options={{
+          title: "My Addresses",
+          headerBackTitle: "",
+          headerBackTitleVisible: false,
+        }}
       />
 
       <Stack.Screen
         name="PaymentMethods"
         component={PaymentMethodsScreen}
-        options={{ title: "Payment Methods" }}
+        options={{
+          title: "Payment Methods",
+          headerBackTitle: "",
+          headerBackTitleVisible: false,
+        }}
       />
 
       <Stack.Screen
         name="OrderHistory"
         component={OrderHistoryScreen}
-        options={{ title: "Order History" }}
+        options={{
+          title: "Order History",
+          headerBackTitle: "",
+          headerBackTitleVisible: false,
+        }}
       />
 
       <Stack.Screen
         name="About"
         component={AboutScreen}
-        options={{ title: "About" }}
+        options={{
+          title: "About",
+          headerBackTitle: "",
+          headerBackTitleVisible: false,
+        }}
       />
 
       <Stack.Screen
         name="Help"
         component={HelpScreen}
-        options={{ title: "Help & Support" }}
+        options={{
+          title: "Help & Support",
+          headerBackTitle: "",
+          headerBackTitleVisible: false,
+        }}
       />
     </Stack.Navigator>
   );

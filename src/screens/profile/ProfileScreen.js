@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 40,
     backgroundColor: "#FFF5F5",
-    marginTop: 20,
   },
 
   avatar: {
