@@ -1,40 +1,161 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import ModalAddressForm from "../../components/ModalAddressForm";
+
+
+import {
+  getAddresses,
+  addAddress,
+  deleteAddress,
+  setDefaultAddress,
+} from "../../services/addressService";
 
 export default function AddressesScreen() {
-  // Temporary mock data — we will replace with Firestore later
-  const data = [
-    { id: "1", label: "Home", address: "123 Main Street", isDefault: true },
-    { id: "2", label: "Work", address: "456 Office Road", isDefault: false },
-  ];
+  const [list, setList] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState(null);
+
+
+  async function load() {
+    const data = await getAddresses();
+    setList(data);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  function handleCreate() {
+    Alert.prompt(
+      "New Address",
+      "Enter your address",
+      async (text) => {
+        if (!text) return;
+        await addAddress({ label: "Address", address: text });
+        load();
+      }
+    );
+  }
+
+  async function handleDelete(id) {
+    Alert.alert(
+      "Delete Address?",
+      "Are you sure you want to delete this address?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await deleteAddress(id);
+            load();
+          },
+        },
+      ]
+    );
+  }
+
+  async function handleSetDefault(id) {
+    await setDefaultAddress(id);
+    load();
+  }
+
+  function handleEdit(item) {
+    setEditData(item);
+    setShowEditModal(true);
+  }
 
   return (
+    <>
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={list}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 20 }}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons name="location-outline" size={22} color="#FF4647" />
-              <View style={{ marginLeft: 12 }}>
+            {/* LEFT */}
+            <View style={{ maxWidth: "75%" }}>
+              {item.label ? (
                 <Text style={styles.label}>{item.label}</Text>
-                <Text style={styles.address}>{item.address}</Text>
-              </View>
+              ) : null}
+
+              <Text style={styles.address}>{item.address}</Text>
+
+              {item.city ? (
+                <Text style={styles.sub}>{item.city}</Text>
+              ) : null}
+
+              {item.postal ? (
+                <Text style={styles.sub}>{item.postal}</Text>
+              ) : null}
+
+              {item.isDefault && (
+                <Text style={styles.defaultTag}>Default</Text>
+              )}
             </View>
 
-            {item.isDefault && (
-              <Text style={styles.defaultTag}>Default</Text>
-            )}
+
+            {/* RIGHT */}
+            <View style={styles.actions}>
+              {/* Make Default */}
+              <TouchableOpacity onPress={() => handleSetDefault(item.id)}>
+                <Ionicons
+                  name={item.isDefault ? "star" : "star-outline"}
+                  size={24}
+                  color={item.isDefault ? "#FFD700" : "#FF4647"}
+                />
+              </TouchableOpacity>
+              
+              {/* Edit */}
+              <TouchableOpacity onPress={() => handleEdit(item)}>
+                <Ionicons name="pencil-outline" size={22} color="#FF4647" />
+              </TouchableOpacity>
+
+              {/* Delete */}
+              <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                <Ionicons name="trash-outline" size={22} color="#FF4647" />
+              </TouchableOpacity>
+
+            </View>
           </View>
         )}
       />
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Add New Address</Text>
-      </TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
+      <Text style={styles.buttonText}>Add New Address</Text>
+    </TouchableOpacity>
     </View>
+
+    <ModalAddressForm
+      visible={showModal}
+      onClose={() => setShowModal(false)}
+        onSubmit={async (data) => {
+          await addAddress(data);
+          load();
+        }}
+    />
+
+    <ModalAddressForm
+      visible={showEditModal}
+      onClose={() => setShowEditModal(false)}
+      defaultValues={editData || {}}
+        onSubmit={async (data) => {
+          await updateAddress(editData.id, data);
+          load();
+        }}
+    />
+
+    </>
   );
 }
 
@@ -54,30 +175,30 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
   address: {
-    fontSize: 14,
-    color: "#555",
-    marginTop: 2,
+    fontSize: 15,
+    fontWeight: "500",
+    marginBottom: 4,
   },
   defaultTag: {
     backgroundColor: PRIMARY,
     color: "#FFF",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 8,
     fontSize: 12,
-    fontWeight: "600",
+    marginTop: 4,
+    alignSelf: "flex-start",
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 12,
   },
   button: {
     backgroundColor: PRIMARY,
     margin: 20,
     paddingVertical: 14,
     borderRadius: 12,
-    elevation: 3,
   },
   buttonText: {
     color: "#FFFFFF",
@@ -85,4 +206,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  label: {
+  fontSize: 15,
+  fontWeight: "700",
+  marginBottom: 2,
+  color: "#1A1A1A",
+  },
+  sub: {
+    fontSize: 13,
+    color: "#555",
+    marginTop: 1,
+  },
+
 });
