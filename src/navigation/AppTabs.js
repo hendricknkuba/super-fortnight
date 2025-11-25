@@ -20,18 +20,19 @@ export default function AppTabs() {
         tabBarActiveTintColor: "#FF4647",
         tabBarInactiveTintColor: "#999",
 
-        tabBarIcon: ({ color, size }) => {
+         // ICONS HANDLING
+        tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
           if (route.name === "Products") {
-            iconName = "storefront-outline";
+            iconName = focused ? "storefront" : "storefront-outline";
           } else if (route.name === "Cart") {
-            iconName = "cart-outline";
+            iconName = focused ? "cart" : "cart-outline";
           } else if (route.name === "Profile") {
-            iconName = "person-circle-outline";
+            iconName = focused ? "person-circle" : "person-circle-outline";
           }
 
-          return <Ionicons name={iconName} color={color} size={size} />;
+          return <Ionicons name={iconName} color={color} size={26} />;
         },
       })}
     >
