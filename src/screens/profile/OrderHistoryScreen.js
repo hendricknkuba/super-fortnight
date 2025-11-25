@@ -6,6 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getUserOrders } from "../../services/orderService";
@@ -37,21 +38,12 @@ export default function OrderHistoryScreen() {
 
   function getStatusBadge(status) {
     const s = status || "Processing";
+
     switch (s) {
       case "Delivered":
-        return {
-          text: "Delivered",
-          dot: "#00C853",
-          bg: "#E8F8EE",
-          fg: "#00C853",
-        };
+        return { text: "Delivered", dot: "#00C853", bg: "#E8F8EE", fg: "#00C853" };
       case "Shipped":
-        return {
-          text: "Shipped",
-          dot: "#FFA000",
-          bg: "#FFF3D6",
-          fg: "#FFA000",
-        };
+        return { text: "Shipped", dot: "#FFA000", bg: "#FFF3D6", fg: "#FFA000" };
       default:
         return {
           text: "Processing",
@@ -78,11 +70,6 @@ export default function OrderHistoryScreen() {
         <Text style={styles.emptySub}>
           Your completed orders will appear here.
         </Text>
-
-        {/* opcional: botão futuro para ir à loja */}
-        {/* <TouchableOpacity style={styles.emptyBtn}>
-          <Text style={styles.emptyBtnText}>Start Shopping</Text>
-        </TouchableOpacity> */}
       </View>
     );
   }
@@ -95,30 +82,32 @@ export default function OrderHistoryScreen() {
         contentContainerStyle={{ padding: 20, paddingBottom: 30 }}
         renderItem={({ item }) => {
           const badge = getStatusBadge(item.status);
+
+          const items = item.items || [];
+          const totalQty = items.reduce((sum, p) => sum + (p.qty || 0), 0);
+
           return (
             <TouchableOpacity activeOpacity={0.9} style={styles.card}>
-              {/* Top row */}
+
+              {/* TOP ROW */}
               <View style={styles.topRow}>
-                <View style={styles.orderLeft}>
+                <View style={styles.leftTop}>
                   <View style={styles.iconCircle}>
                     <Ionicons name="cube-outline" size={18} color="#FF4647" />
                   </View>
-                  <Text style={styles.orderId} numberOfLines={1}>
+
+                  <Text
+                    style={styles.orderId}
+                    numberOfLines={1}
+                    ellipsizeMode="middle"
+                  >
                     Order #{item.id}
                   </Text>
                 </View>
 
-                <View
-                  style={[
-                    styles.badge,
-                    { backgroundColor: badge.bg },
-                  ]}
-                >
+                <View style={[styles.badge, { backgroundColor: badge.bg }]}>
                   <View
-                    style={[
-                      styles.badgeDot,
-                      { backgroundColor: badge.dot },
-                    ]}
+                    style={[styles.badgeDot, { backgroundColor: badge.dot }]}
                   />
                   <Text style={[styles.badgeText, { color: badge.fg }]}>
                     {badge.text}
@@ -126,19 +115,41 @@ export default function OrderHistoryScreen() {
                 </View>
               </View>
 
-              {/* Middle */}
+              {/* DATE */}
               <View style={styles.midRow}>
                 <Ionicons name="calendar-outline" size={14} color="#8A8A8A" />
                 <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
               </View>
 
-              {/* Bottom */}
-              <View style={styles.bottomRow}>
-                <Text style={styles.totalLabel}>Total</Text>
-                <Text style={styles.totalAmount}>
-                  ${item.total?.toFixed(2) || "0.00"}
-                </Text>
+              {/* PRODUCT PREVIEW */}
+              <View style={styles.previewRow}>
+                {items.slice(0, 3).map((prod, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: prod.image }}
+                    style={styles.previewImg}
+                  />
+                ))}
+
+                {items.length > 3 && (
+                  <View style={styles.moreCircle}>
+                    <Text style={styles.moreText}>+{items.length - 3}</Text>
+                  </View>
+                )}
               </View>
+
+              {/* FOOTER */}
+              <View style={styles.bottomRow}>
+                <Text style={styles.itemsCount}>{totalQty} items</Text>
+
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={styles.totalLabel}>Total Paid</Text>
+                  <Text style={styles.totalAmount}>
+                    ${item.total?.toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+
             </TouchableOpacity>
           );
         }}
@@ -149,17 +160,13 @@ export default function OrderHistoryScreen() {
 
 const PRIMARY = "#FF4647";
 
+/* =============================
+      STYLES
+============================= */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
+  container: { flex: 1, backgroundColor: "#FFF" },
 
-  loadingBox: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  loadingBox: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   emptyBox: {
     flex: 1,
@@ -179,33 +186,18 @@ const styles = StyleSheet.create({
     color: "#6F6F6F",
     textAlign: "center",
   },
-  emptyBtn: {
-    marginTop: 18,
-    backgroundColor: PRIMARY,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-  },
-  emptyBtnText: {
-    color: "#FFF",
-    fontWeight: "700",
-  },
 
   card: {
     backgroundColor: "#FFFFFF",
-    padding: 16,
+    padding: 18,
     borderRadius: 16,
-    marginBottom: 16,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: "#F0F0F0",
-
-    // iOS shadow
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-
-    // Android shadow
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
 
@@ -213,13 +205,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingRight: 4,
   },
 
-  orderLeft: {
+  leftTop: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    maxWidth: "70%",
+    maxWidth: "55%",
   },
 
   iconCircle: {
@@ -232,27 +225,33 @@ const styles = StyleSheet.create({
   },
 
   orderId: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: "#1A1A1A",
+    maxWidth: 160,
   },
 
   badge: {
     flexDirection: "row",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 18,
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-    gap: 6,
+    gap: 4,
+    maxWidth: "45%",
+    justifyContent: "flex-end",
   },
+
   badgeDot: {
     width: 7,
     height: 7,
     borderRadius: 999,
   },
+
   badgeText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "700",
+    textAlign: "right",
   },
 
   midRow: {
@@ -261,29 +260,65 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
+
   date: {
     fontSize: 13,
     color: "#6F6F6F",
     fontWeight: "500",
   },
 
-  bottomRow: {
+  previewRow: {
+    flexDirection: "row",
     marginTop: 14,
-    paddingTop: 12,
+    alignItems: "center",
+    gap: 6,
+  },
+
+  previewImg: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "#F5F5F5",
+  },
+
+  moreCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: PRIMARY,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 4,
+  },
+  moreText: {
+    color: "#FFF",
+    fontWeight: "700",
+  },
+
+  bottomRow: {
+    marginTop: 18,
     borderTopWidth: 1,
     borderTopColor: "#F3F3F3",
+    paddingTop: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  totalLabel: {
+
+  itemsCount: {
     fontSize: 14,
-    color: "#6F6F6F",
     fontWeight: "600",
+    color: "#444",
+  },
+
+  totalLabel: {
+    fontSize: 13,
+    color: "#666",
   },
   totalAmount: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "800",
     color: PRIMARY,
+    marginTop: 2,
   },
 });
