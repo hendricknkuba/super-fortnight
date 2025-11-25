@@ -52,6 +52,20 @@ export async function seedProducts() {
       description: "Explore the origins, growth, and impact of the ancient world.",
       image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500&h=500&fit=crop",
     },
+    {
+      name: "Realm of the Lost Magic",
+      category: "Books",
+      price: 22.99,
+      description: "A captivating fantasy epic about a young mage's journey through magical realms and ancient prophecies.",
+      image: "https://images.unsplash.com/photo-1629992101753-56d196c8aabb?w=500&h=500&fit=crop",
+    },
+    {
+      name: "The Art of Healthy Cooking",
+      category: "Books",
+      price: 27.50,
+      description: "Comprehensive guide to healthy eating with 100+ recipes and nutritional advice for everyday wellness.",
+      image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&h=500&fit=crop",
+    },
 
     // -------------------
     // APPAREL
@@ -76,6 +90,20 @@ export async function seedProducts() {
       price: 27.99,
       description: "Lightweight joggers ideal for workouts and casual wear.",
       image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&h=500&fit=crop",
+    },
+    {
+      name: "Denim Jacket",
+      category: "Apparel",
+      price: 49.99,
+      description: "Classic denim jacket with a modern fit, perfect for casual outings and layered looks.",
+      image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=500&fit=crop",
+    },
+    {
+      name: "Floral Summer Dress",
+      category: "Apparel",
+      price: 39.99,
+      description: "Elegant summer dress with floral pattern, made from lightweight and breathable fabric.",
+      image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&h=500&fit=crop",
     },
   ];
 
