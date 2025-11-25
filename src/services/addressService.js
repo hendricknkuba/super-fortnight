@@ -72,3 +72,23 @@ export async function setDefaultAddress(id) {
     });
   });
 }
+
+export async function getDefaultAddress() {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return null;
+
+  const ref = collection(db, "users", uid, "addresses");
+
+  const q = query(ref, where("isDefault", "==", true));
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) return null;
+
+  const docSnap = snap.docs[0];
+
+  return {
+    id: docSnap.id,
+    ...docSnap.data(),
+  };
+}
