@@ -34,7 +34,7 @@ export default function ModalAddressForm({
       setCity(defaultValues.city || "");
       setPostal(defaultValues.postal || "");
     }
-  }, [defaultValues, visible]);
+  }, [visible]);
 
   function handleSave() {
     if (!address.trim()) return;
