@@ -2,8 +2,10 @@ import React, { useEffect, useRef } from "react";
 import { Animated, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-
 import ProfileStack from "./ProfileStack";
+import { useCart } from "../context/CartContext";
+import ProductsStack from "./ProductsStack";
+import CartStack from "./CartStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -13,6 +15,7 @@ function Placeholder({ label }) {
 
 export default function AppTabs() {
   const fadeAnim = useRef(new Animated.Value(0)).current; // start invisible
+  const { getCount } = useCart();
 
   // fade-in on mount
   useEffect(() => {
@@ -31,6 +34,15 @@ export default function AppTabs() {
           tabBarActiveTintColor: "#FF4647",
           tabBarInactiveTintColor: "#999",
 
+          tabBarBadge:
+          route.name === "Cart" && getCount() > 0
+            ? getCount()
+            : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: "#FF4647",
+            color: "#FFF",
+          },
+
           tabBarIcon: ({ focused, color }) => {
             let iconName;
 
@@ -46,8 +58,16 @@ export default function AppTabs() {
           },
         })}
       >
-        <Tab.Screen name="Products" children={() => <Placeholder label="Products" />} />
-        <Tab.Screen name="Cart" children={() => <Placeholder label="Cart" />} />
+        <Tab.Screen
+          name="Products"
+          component={ProductsStack}
+          options={{ headerShown: true }}
+        />
+        <Tab.Screen 
+          name="Cart" 
+          component={CartStack}
+          options={{ headerShown: true }}
+        />
         <Tab.Screen
           name="Profile"
           component={ProfileStack}
