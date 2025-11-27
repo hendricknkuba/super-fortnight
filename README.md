@@ -46,14 +46,6 @@ This is a clean and modern mobile e-commerce app built with **Expo (React Native
 
 ---
 
-## 👥 Team (3 Members)
-
-* **Person 1:** Auth, Profile, Addresses CRUD, UI/UX
-* **Person 2:** Products + Cart
-* **Person 3:** Payment Methods + Orders
-
----
-
 ## ▶️ Running the Project
 
 ```bash
